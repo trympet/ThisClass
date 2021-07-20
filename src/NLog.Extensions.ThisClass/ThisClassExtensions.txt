@@ -6,6 +6,6 @@ namespace NLog
     {
         public static Logger GetCurrentClassLogger<T>(this T sender)
             where T : global::ThisClassAttribute.IThisClass
-            => LogManager.GetLogger(sender.ClassFullName);
+            => global::NLog.LogManager.GetLogger(sender.ClassFullName);
     }
 }

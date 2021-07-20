@@ -20,7 +20,7 @@ namespace {{ namespace }}
         public static partial class ThisClass
         {
             /// <summary>
-            /// Gets the fully qualified name of the class invoking the calling method, including the namespace but not the assembly.
+            /// Gets the fully qualified name of the parent class, including the namespace but not the assembly.
             /// </summary>
             public const string FullName = "{{ class_full }}";
         }
