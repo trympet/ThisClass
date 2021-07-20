@@ -1,0 +1,11 @@
+﻿using System;
+
+namespace NLog
+{
+    static class ThisClassExtensions
+    {
+        public static Logger GetCurrentClassLogger<T>(this T sender)
+            where T : global::ThisClassAttribute.IThisClass
+            => LogManager.GetLogger(sender.ClassFullName);
+    }
+}

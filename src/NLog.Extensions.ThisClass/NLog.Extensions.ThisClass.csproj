@@ -1,0 +1,46 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <PackageScribanIncludeSource>true</PackageScribanIncludeSource>
+    <AnalysisLevel>latest</AnalysisLevel>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="ClassLogger.sbntxt" />
+    <None Remove="ClassLoggerAttribute.txt" />
+    <None Remove="IThisClassImpl.sbntxt" />
+    <None Remove="ThisClassAttribute.IThisClass.txt" />
+    <None Remove="ThisClassExtensions.txt" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="ClassLogger.sbntxt" />
+    <EmbeddedResource Include="ClassLoggerAttribute.txt" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="IThisClassImpl.sbntxt" />
+    <EmbeddedResource Include="ThisClassAttribute.IThisClass.txt" />
+    <EmbeddedResource Include="ThisClassExtensions.txt" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Scriban" Version="4.0.1" Pack="false" IncludeAssets="build" />
+    <PackageReference Include="Microsoft.CSharp" Version="4.5.0" />
+
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="3.10.0" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.3.2" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="NLog" Version="4.7.10" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ThisClass\ThisClass.csproj" PrivateAssets="all" Pack="false" />
+  </ItemGroup>
+
+</Project>
