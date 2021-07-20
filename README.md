@@ -2,6 +2,7 @@
 Exposes class and type information as constants in the ThisClass class using source generators powered by Roslyn, inspired by ThisAssembly.
 
 ## ThisClass
+Add the `ThisClassAttribute` to generate type information for a class.
 ```csharp
 [ThisClass]
 partial class Demo
