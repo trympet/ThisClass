@@ -1,6 +1,9 @@
 # ThisClass
 Exposes class and type information as constants in the ThisClass class using source generators powered by Roslyn, inspired by ThisAssembly.
 
+## ThisClass
+
+
 ## NLog.Extensions.ThisClass
 Create class loggers without the use of reflection.
 ```csharp
