@@ -89,7 +89,7 @@ namespace ThisClass
                 {
                     Namespace = namespaceName,
                     Class = className,
-                    ClassFull = $"{namespaceName}.{className}",
+                    ClassFull = namedTypeSymbol.ToDisplayString(new SymbolDisplayFormat(typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces)),
                 });
 
                 return thisClassContent;

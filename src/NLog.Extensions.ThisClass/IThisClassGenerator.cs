@@ -96,6 +96,16 @@ namespace NLog.Extensions.ThisClass
                 typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypes,
                 genericsOptions: SymbolDisplayGenericsOptions.IncludeTypeParameters | SymbolDisplayGenericsOptions.IncludeTypeConstraints | SymbolDisplayGenericsOptions.IncludeVariance);
                 var className = namedTypeSymbol.ToDisplayString(classNameFormat);
+                var parts = namedTypeSymbol.ToDisplayParts(classNameFormat);
+                const string interfaceImpl = " : global::ThisClassAttribute.IThisClass";
+                if (className.Contains(" where"))
+                {
+                    className = className.Insert(className.IndexOf(" where"), interfaceImpl);
+                }
+                else
+                {
+                    className += interfaceImpl;
+                }
 
                 var thisClassContent = IThisClassImplTemplate.Render(new
                 {
