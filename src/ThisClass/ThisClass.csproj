@@ -4,13 +4,10 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <IsPackable>true</IsPackable>
     <PackBuildOutput>false</PackBuildOutput>
-    <Nullable>enable</Nullable>
-    <AnalysisLevel>latest</AnalysisLevel>
-    <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
   <PropertyGroup>
-    <PackageScribanIncludeSource>true</PackageScribanIncludeSource>
+    <Description>Exposes class and type information as constants in the ThisClass class using source generators powered by Roslyn, inspired by ThisAssembly.</Description>
   </PropertyGroup>
 
   <ItemGroup>
@@ -20,10 +17,6 @@
 
   <ItemGroup>
     <PackageReference Include="Scriban" Version="4.0.1" Pack="false" IncludeAssets="build" />
-    <PackageReference Include="Microsoft.CSharp" Version="4.5.0" />
-    
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="3.10.0" PrivateAssets="all" />
-    <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.3.2" PrivateAssets="all" />
   </ItemGroup>
 
 </Project>
