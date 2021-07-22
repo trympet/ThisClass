@@ -47,42 +47,56 @@ namespace NLog.Extensions.ThisClass
                     return;
                 }
 
-                var classLoggerAttributeSymbol = compilation.GetTypeByMetadataName($"ClassLoggerAttribute");
+                var classLoggerAttributeSymbol = compilation.GetTypeByMetadataName("ClassLoggerAttribute");
                 if (classLoggerAttributeSymbol is null)
                 {
                     return;
                 }
 
-                foreach (var candidateClass in receiver.CandidateClasses)
+                var namedTypeSymbols = receiver.CandidateClasses
+                    .Select(x => compilation
+                        .GetSemanticModel(x.SyntaxTree)
+                        .GetDeclaredSymbol(x))
+                    .Distinct(SymbolEqualityComparer.Default)
+                    .OfType<INamedTypeSymbol>();
+
+                foreach (var namedTypeSymbol in namedTypeSymbols)
                 {
-                    var semanticModel = compilation.GetSemanticModel(candidateClass.SyntaxTree);
-                    var namedTypeSymbol = semanticModel.GetDeclaredSymbol(candidateClass);
-                    if (namedTypeSymbol is null)
+                    try
                     {
-                        continue;
+                        bool hasThisClassAttribute = ThisClassGenerator.HasAttribute(namedTypeSymbol, thisClassAttributeSymbol);
+                        if (ThisClassGenerator.HasAttribute(namedTypeSymbol, classLoggerAttributeSymbol))
+                        {
+                            //ThisClassGenerator.AddThisClassToClass(context, namedTypeSymbol);
+                            var classLoggerSource = GetCurrentClassLoggerSource(namedTypeSymbol);
+                            hasThisClassAttribute = true;
+                            if (classLoggerSource is not null)
+                            {
+                                ThisClassGenerator.AddThisClassToClass(context, namedTypeSymbol);
+                                context.AddSource($"{namedTypeSymbol.Name}_ClassLogger.cs", SourceText.From(classLoggerSource, Encoding.UTF8));
+                            }
+                        }
+
+                        if (hasThisClassAttribute)
+                        {
+                            var thisClassImplSource = GetIThisClassImplSource(namedTypeSymbol);
+                            if (thisClassImplSource is not null)
+                            {
+                                context.AddSource($"{namedTypeSymbol.Name}_IThisClass.cs", SourceText.From(thisClassImplSource, Encoding.UTF8));
+                            }
+                        }
+
+                    }
+                    catch (Exception e)
+                    {
+                        _ = e;
+#if DEBUG
+                        System.Diagnostics.Debugger.Launch();
+#endif
+                        throw;
                     }
 
-                    bool hasThisClassAttribute = ThisClassGenerator.HasAttribute(namedTypeSymbol, thisClassAttributeSymbol);
-                    if (ThisClassGenerator.HasAttribute(namedTypeSymbol, classLoggerAttributeSymbol))
-                    {
-                        //ThisClassGenerator.AddThisClassToClass(context, namedTypeSymbol);
-                        var classLoggerSource = GetCurrentClassLoggerSource(namedTypeSymbol);
-                        hasThisClassAttribute = true;
-                        if (classLoggerSource is not null)
-                        {
-                            ThisClassGenerator.AddThisClassToClass(context, namedTypeSymbol);
-                            context.AddSource($"{namedTypeSymbol.Name}_ClassLogger.cs", SourceText.From(classLoggerSource, Encoding.UTF8));
-                        }
-                    }
 
-                    if (hasThisClassAttribute)
-                    {
-                        var thisClassImplSource = GetIThisClassImplSource(namedTypeSymbol);
-                        if (thisClassImplSource is not null)
-                        {
-                            context.AddSource($"{namedTypeSymbol.Name}_IThisClass.cs", SourceText.From(thisClassImplSource, Encoding.UTF8));
-                        }
-                    }
                 }
             }
         }
@@ -143,7 +157,7 @@ namespace NLog.Extensions.ThisClass
 
         class IThisClassSyntaxReceiver : ISyntaxReceiver
         {
-            public List<ClassDeclarationSyntax> CandidateClasses { get; } = new();
+            public HashSet<ClassDeclarationSyntax> CandidateClasses { get; } = new();
 
             public void OnVisitSyntaxNode(SyntaxNode syntaxNode)
             {
