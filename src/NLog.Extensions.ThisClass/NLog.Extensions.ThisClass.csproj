@@ -8,6 +8,14 @@
     <Description>Create class loggers using source generators powered by Roslyn.</Description>
   </PropertyGroup>
 
+    <ItemGroup>
+    <Compile Include="../ThisClass/EmbeddedResource.cs" />
+    <Compile Include="../ThisClass/INamedTypeSymbolExtensions.cs" />
+    <Compile Include="../ThisClass/ThisClassGenerator.cs" />
+    <EmbeddedResource Include="../ThisClass/ThisClass.sbntxt" />
+    <EmbeddedResource Include="../ThisClass/ThisClassAttribute.txt" />
+  </ItemGroup>
+
   <ItemGroup>
     <EmbeddedResource Include="ClassLogger.sbntxt" />
     <EmbeddedResource Include="ClassLoggerAttribute.txt" />
