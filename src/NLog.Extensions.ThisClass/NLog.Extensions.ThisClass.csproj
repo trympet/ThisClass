@@ -8,6 +8,14 @@
     <Description>Create class loggers using source generators powered by Roslyn.</Description>
   </PropertyGroup>
 
+    <ItemGroup>
+    <Compile Include="../ThisClass/EmbeddedResource.cs" />
+    <Compile Include="../ThisClass/INamedTypeSymbolExtensions.cs" />
+    <Compile Include="../ThisClass/ThisClassGenerator.cs" />
+    <EmbeddedResource Include="../ThisClass/ThisClass.sbntxt" />
+    <EmbeddedResource Include="../ThisClass/ThisClassAttribute.txt" />
+  </ItemGroup>
+
   <ItemGroup>
     <EmbeddedResource Include="ClassLogger.sbntxt" />
     <EmbeddedResource Include="ClassLoggerAttribute.txt" />
@@ -25,11 +33,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ThisClass\ThisClass.csproj" PrivateAssets="all" Pack="false" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Update="Microsoft.CodeAnalysis.Analyzers" Version="3.3.3" />
     <PackageReference Update="Microsoft.CodeAnalysis.CSharp" Version="3.11.0" />
     <PackageReference Update="Microsoft.CSharp" Version="4.7.0" />
   </ItemGroup>
