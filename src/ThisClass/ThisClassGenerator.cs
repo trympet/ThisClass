@@ -12,32 +12,8 @@ using ThisClass.Common;
 namespace ThisClass
 {
     [Generator]
-    public class ThisClassGenerator : ISourceGenerator
+    public partial class ThisClassGenerator : ISourceGenerator
     {
-        private static readonly SourceText ThisClassAttributeSourceText = SourceText.From(EmbeddedResource.GetContent("ThisClassAttribute.txt"), Encoding.UTF8);
-        private static readonly Template ThisClassTemplate = Template.Parse(EmbeddedResource.GetContent("ThisClass.sbntxt"));
-
-        public static void AddThisClassToClass(GeneratorExecutionContext context, INamedTypeSymbol namedTypeSymbol)
-        {
-            var thisClassSource = ProcessClass(namedTypeSymbol);
-            if (thisClassSource is not null)
-            {
-                context.AddSource($"{namedTypeSymbol.Name}_ThisClass.cs", SourceText.From(thisClassSource, Encoding.UTF8));
-            }
-        }
-
-        public static bool HasAttribute(INamedTypeSymbol symbol, INamedTypeSymbol? attributeSymbol) => symbol
-            .GetAttributes()
-            .Any(ad => ad?.AttributeClass?.Equals(attributeSymbol, SymbolEqualityComparer.Default) ?? false);
-
-        public static bool HasThisClassAttribute(INamedTypeSymbol symbol, Compilation compilation)
-            => HasAttribute(symbol, compilation.GetTypeByMetadataName($"ThisClassAttribute"));
-
-        public static void AddThisClassAttribute(GeneratorExecutionContext context)
-        {
-            context.AddSource("ThisClassAttribute.cs", ThisClassAttributeSourceText);
-        }
-
         public void Initialize(GeneratorInitializationContext context)
         {
             //System.Diagnostics.Debugger.Launch();
@@ -73,29 +49,6 @@ namespace ThisClass
                     }
                 }
             }
-        }
-
-        private static string? ProcessClass(INamedTypeSymbol namedTypeSymbol)
-        {
-            if (namedTypeSymbol.IsInContainingNamespace())
-            {
-                var namespaceName = namedTypeSymbol.ContainingNamespace.ToDisplayString();
-                var classNameFormat = new SymbolDisplayFormat(
-                typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypes,
-                genericsOptions: SymbolDisplayGenericsOptions.IncludeTypeParameters | SymbolDisplayGenericsOptions.IncludeTypeConstraints | SymbolDisplayGenericsOptions.IncludeVariance);
-                var className = namedTypeSymbol.ToDisplayString(classNameFormat);
-
-                var thisClassContent = ThisClassTemplate.Render(new
-                {
-                    Namespace = namespaceName,
-                    Class = className,
-                    ClassFull = namedTypeSymbol.ToDisplayString(new SymbolDisplayFormat(typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces)),
-                });
-
-                return thisClassContent;
-            }
-
-            return null;
         }
 
         class ThisClassSyntaxReceiver : ISyntaxReceiver
