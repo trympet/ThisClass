@@ -29,9 +29,9 @@ namespace NLog.Extensions.ThisClass
 
         public void Execute(GeneratorExecutionContext context)
         {
-            context.AddSource("ThisClassAttribute.IThisClass.cs", IThisClassSourceText);
-            context.AddSource("ThisClassExtensions.cs", ThisClassExtensionsSourceText);
-            context.AddSource("ClassLoggerAttribute.cs", ClassLoggerAttributeSourceText);
+            context.AddSource("ThisClassAttribute_IThisClass.g", IThisClassSourceText);
+            context.AddSource("ThisClassExtensions.g", ThisClassExtensionsSourceText);
+            context.AddSource("ClassLoggerAttribute.g", ClassLoggerAttributeSourceText);
 
             if (context.SyntaxReceiver is IThisClassSyntaxReceiver receiver)
             {
@@ -73,7 +73,7 @@ namespace NLog.Extensions.ThisClass
                             if (classLoggerSource is not null)
                             {
                                 ThisClassGenerator.AddThisClassToClass(context, namedTypeSymbol);
-                                context.AddSource($"{namedTypeSymbol.Name}_ClassLogger.cs", SourceText.From(classLoggerSource, Encoding.UTF8));
+                                context.AddSource($"{namedTypeSymbol.Name}_ClassLogger.g", SourceText.From(classLoggerSource, Encoding.UTF8));
                             }
                         }
 
@@ -82,7 +82,7 @@ namespace NLog.Extensions.ThisClass
                             var thisClassImplSource = GetIThisClassImplSource(namedTypeSymbol);
                             if (thisClassImplSource is not null)
                             {
-                                context.AddSource($"{namedTypeSymbol.Name}_IThisClass.cs", SourceText.From(thisClassImplSource, Encoding.UTF8));
+                                context.AddSource($"{namedTypeSymbol.Name}_IThisClass.g", SourceText.From(thisClassImplSource, Encoding.UTF8));
                             }
                         }
 

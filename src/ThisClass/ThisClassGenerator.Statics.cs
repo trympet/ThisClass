@@ -21,7 +21,7 @@ namespace ThisClass
             var thisClassSource = ProcessClass(namedTypeSymbol);
             if (thisClassSource is not null)
             {
-                context.AddSource($"{namedTypeSymbol.Name}_ThisClass.cs", SourceText.From(thisClassSource, Encoding.UTF8));
+                context.AddSource($"{namedTypeSymbol.Name}_ThisClass.g", SourceText.From(thisClassSource, Encoding.UTF8));
             }
         }
 
@@ -34,7 +34,7 @@ namespace ThisClass
 
         public static void AddThisClassAttribute(GeneratorExecutionContext context)
         {
-            context.AddSource("ThisClassAttribute.cs", ThisClassAttributeSourceText);
+            context.AddSource("ThisClassAttribute.g", ThisClassAttributeSourceText);
         }
 
         private static string? ProcessClass(INamedTypeSymbol namedTypeSymbol)
