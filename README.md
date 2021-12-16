@@ -9,14 +9,14 @@ partial class Demo
 {
     public Demo()
     {
-        Logger.Info($"Hello from {ThisClass.FullName}");
+        Logger.Info($"Hello from {ThisClass.FullName}"); // SampleApp.Demo
     }
 }
 ```
 
 
 ## NLog.Extensions.ThisClass
-Create class loggers without the use of reflection.
+Create class loggers without using reflection.
 ```csharp
 [ClassLogger]
 partial class Demo
