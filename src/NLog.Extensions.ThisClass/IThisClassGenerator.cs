@@ -18,8 +18,10 @@ namespace NLog.Extensions.ThisClass
         private static readonly SourceText IThisClassSourceText = SourceText.From(EmbeddedResource.GetContent("ThisClassAttribute.IThisClass.txt"), Encoding.UTF8);
         private static readonly SourceText ThisClassExtensionsSourceText = SourceText.From(EmbeddedResource.GetContent("ThisClassExtensions.txt"), Encoding.UTF8);
         private static readonly SourceText ClassLoggerAttributeSourceText = SourceText.From(EmbeddedResource.GetContent("ClassLoggerAttribute.txt"), Encoding.UTF8);
+        private static readonly SourceText ClassLoggerLazyAttributeSourceText = SourceText.From(EmbeddedResource.GetContent("ClassLoggerLazyAttribute.txt"), Encoding.UTF8);
         private static readonly Template IThisClassImplTemplate = Template.Parse(EmbeddedResource.GetContent("IThisClassImpl.sbntxt"));
         private static readonly Template ClassLoggerTemplate = Template.Parse(EmbeddedResource.GetContent("ClassLogger.sbntxt"));
+        private static readonly Template ClassLoggerLazyTemplate = Template.Parse(EmbeddedResource.GetContent("ClassLoggerLazy.sbntxt"));
 
         public void Initialize(GeneratorInitializationContext context)
         {
@@ -29,9 +31,11 @@ namespace NLog.Extensions.ThisClass
 
         public void Execute(GeneratorExecutionContext context)
         {
+            //System.Diagnostics.Debugger.Launch();
             context.AddSource("ThisClassAttribute_IThisClass.g", IThisClassSourceText);
             context.AddSource("ThisClassExtensions.g", ThisClassExtensionsSourceText);
             context.AddSource("ClassLoggerAttribute.g", ClassLoggerAttributeSourceText);
+            context.AddSource("ClassLoggerLazyAttribute.g", ClassLoggerLazyAttributeSourceText);
 
             if (context.SyntaxReceiver is IThisClassSyntaxReceiver receiver)
             {
@@ -39,7 +43,8 @@ namespace NLog.Extensions.ThisClass
                 var compilation = context.Compilation.AddSyntaxTrees(
                     CSharpSyntaxTree.ParseText(IThisClassSourceText, options),
                     CSharpSyntaxTree.ParseText(ThisClassExtensionsSourceText, options),
-                    CSharpSyntaxTree.ParseText(ClassLoggerAttributeSourceText, options));
+                    CSharpSyntaxTree.ParseText(ClassLoggerAttributeSourceText, options),
+                    CSharpSyntaxTree.ParseText(ClassLoggerLazyAttributeSourceText, options));
 
                 var thisClassAttributeSymbol = compilation.GetTypeByMetadataName($"ThisClassAttribute");
                 if (thisClassAttributeSymbol is null)
@@ -49,6 +54,12 @@ namespace NLog.Extensions.ThisClass
 
                 var classLoggerAttributeSymbol = compilation.GetTypeByMetadataName("ClassLoggerAttribute");
                 if (classLoggerAttributeSymbol is null)
+                {
+                    return;
+                }
+
+                var classLoggerLazyAttributeSymbol = compilation.GetTypeByMetadataName("ClassLoggerLazyAttribute");
+                if (classLoggerLazyAttributeSymbol is null)
                 {
                     return;
                 }
@@ -68,7 +79,7 @@ namespace NLog.Extensions.ThisClass
                         if (ThisClassGenerator.HasAttribute(namedTypeSymbol, classLoggerAttributeSymbol))
                         {
                             //ThisClassGenerator.AddThisClassToClass(context, namedTypeSymbol);
-                            var classLoggerSource = GetCurrentClassLoggerSource(namedTypeSymbol);
+                            var classLoggerSource = GetCurrentClassLoggerSource(namedTypeSymbol, ClassLoggerTemplate);
                             hasThisClassAttribute = true;
                             if (classLoggerSource is not null)
                             {
@@ -76,6 +87,17 @@ namespace NLog.Extensions.ThisClass
                                 context.AddSource($"{namedTypeSymbol.Name}_ClassLogger.g", SourceText.From(classLoggerSource, Encoding.UTF8));
                             }
                         }
+                        else if (ThisClassGenerator.HasAttribute(namedTypeSymbol, classLoggerLazyAttributeSymbol))
+                        {
+                            var classLoggerLazySource = GetCurrentClassLoggerSource(namedTypeSymbol, ClassLoggerLazyTemplate);
+                            hasThisClassAttribute = true;
+                            if (classLoggerLazySource is not null)
+                            {
+                                ThisClassGenerator.AddThisClassToClass(context, namedTypeSymbol);
+                                context.AddSource($"{namedTypeSymbol.Name}_ClassLoggerLazy.g", SourceText.From(classLoggerLazySource, Encoding.UTF8));
+                            }
+                        }
+
 
                         if (hasThisClassAttribute)
                         {
@@ -133,7 +155,7 @@ namespace NLog.Extensions.ThisClass
             return null;
         }
 
-        private static string? GetCurrentClassLoggerSource(INamedTypeSymbol namedTypeSymbol)
+        private static string? GetCurrentClassLoggerSource(INamedTypeSymbol namedTypeSymbol, Template template)
         {
             if (namedTypeSymbol.IsInContainingNamespace())
             {
@@ -143,7 +165,7 @@ namespace NLog.Extensions.ThisClass
                 genericsOptions: SymbolDisplayGenericsOptions.IncludeTypeParameters | SymbolDisplayGenericsOptions.IncludeTypeConstraints | SymbolDisplayGenericsOptions.IncludeVariance);
                 var className = namedTypeSymbol.ToDisplayString(classNameFormat);
 
-                var thisClassContent = ClassLoggerTemplate.Render(new
+                var thisClassContent = template.Render(new
                 {
                     Namespace = namespaceName,
                     Class = className,

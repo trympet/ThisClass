@@ -15,6 +15,7 @@ namespace SampleApp.NLog
             {
                 new Demo1();
                 new Demo2();
+                Demo3.SayHello();
             }
             finally
             {
@@ -45,7 +46,7 @@ namespace SampleApp.NLog
             var x = this.GetCurrentClassLogger();
             x.Trace("Hello World from {}", ThisClass.FullName);
         }
-    } 
+    }
 
     [ClassLogger]
     partial class Demo2
@@ -69,5 +70,13 @@ namespace SampleApp.NLog
             throw new Exception("Whoops!");
         }
     }
+
+    [ClassLoggerLazy]
+    partial class Demo3
+    {
+        public static void SayHello()
+        {
+            Logger.Info("Hei på deg");
+        }
+    }
 }
-   

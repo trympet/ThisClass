@@ -18,7 +18,9 @@
 
   <ItemGroup>
     <EmbeddedResource Include="ClassLogger.sbntxt" />
+    <EmbeddedResource Include="ClassLoggerLazy.sbntxt" />
     <EmbeddedResource Include="ClassLoggerAttribute.txt" />
+    <EmbeddedResource Include="ClassLoggerLazyAttribute.txt" />
   </ItemGroup>
 
   <ItemGroup>
