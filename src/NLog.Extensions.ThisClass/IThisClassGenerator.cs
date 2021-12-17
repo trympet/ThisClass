@@ -65,6 +65,7 @@ namespace NLog.Extensions.ThisClass
                 }
 
                 var namedTypeSymbols = receiver.CandidateClasses
+                    .Where(x => x.AttributeLists.Count > 0)
                     .Select(x => compilation
                         .GetSemanticModel(x.SyntaxTree)
                         .GetDeclaredSymbol(x))
