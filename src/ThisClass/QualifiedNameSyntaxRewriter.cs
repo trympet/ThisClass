@@ -12,7 +12,6 @@ namespace ThisClass
         {
             this.semanticModel = semanticModel;
         }
-
         public override SyntaxNode? VisitSimpleBaseType(SimpleBaseTypeSyntax node)
         {
             return node.WithType(EnsureQualifiedTypeSyntax(node.Type));

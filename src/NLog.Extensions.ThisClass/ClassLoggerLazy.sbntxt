@@ -9,7 +9,6 @@ namespace {{ namespace }}
     {{ class }}
     {
         private static global::NLog.Logger? __loggerLazy;
-
         private static global::NLog.Logger Logger => __loggerLazy ??= global::NLog.LogManager.GetLogger(ThisClass.FullName);
     }
 }

@@ -4,7 +4,6 @@ using NLog.Targets;
 using NLog.Targets.Wrappers;
 using System;
 using SomeNamespace;
-using SomeOtherNamespace;
 
 namespace SampleApp.NLog
 {
@@ -80,12 +79,22 @@ namespace SampleApp.NLog
             Logger.Info("Hei på deg");
         }
     }
-    [ClassLoggerLazy]
-    partial class Demo4<T> : SomeInterface<T> where T : SomeOtherInterface
+
+    namespace AnotherNamespace
     {
-        public static void SayHello()
+        using SomeOtherNamespace; // crazy syntaxs
+        [ClassLoggerLazy]
+        partial class Demo4<T> : SomeInterface<T> where T : SomeOtherInterface
         {
-            Logger.Info("Hei på deg");
+            public static void SayHello()
+            {
+                Logger.Info("Hei på deg");
+            }
+
+            [ClassLoggerLazy]
+            internal partial class NestedClass : SomeInterface<SomeOtherInterface>
+            {
+            }
         }
     }
 }

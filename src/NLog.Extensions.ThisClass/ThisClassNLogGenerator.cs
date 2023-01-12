@@ -5,117 +5,78 @@ using Microsoft.CodeAnalysis.Text;
 using Scriban;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using ThisClass;
 using ThisClass.Common;
 
 namespace NLog.Extensions.ThisClass
 {
-    [Generator]
-    internal class ThisClassNLogGenerator : ISourceGenerator
+
+    [Generator(LanguageNames.CSharp)]
+    internal class ThisClassNLogGenerator : IIncrementalGenerator
     {
         private static readonly SourceText ClassLoggerAttributeSourceText = SourceText.From(EmbeddedResource.GetContent("ClassLoggerAttribute.txt"), Encoding.UTF8);
         private static readonly SourceText ClassLoggerLazyAttributeSourceText = SourceText.From(EmbeddedResource.GetContent("ClassLoggerLazyAttribute.txt"), Encoding.UTF8);
-        private static readonly Template ClassLoggerTemplate = Template.Parse(EmbeddedResource.GetContent("ClassLogger.sbntxt"));
-        private static readonly Template ClassLoggerLazyTemplate = Template.Parse(EmbeddedResource.GetContent("ClassLoggerLazy.sbntxt"));
-
-        public void Initialize(GeneratorInitializationContext context)
+        private static readonly MemberDeclarationSyntax[] ClassLoggerMembers = new[]
         {
-            //System.Diagnostics.Debugger.Launch();
-            context.RegisterForSyntaxNotifications(() => new ThisClassNLogSyntaxReceiver());
+            SyntaxFactory.ParseMemberDeclaration(
+            "private static readonly global::NLog.Logger Logger = global::NLog.LogManager.GetLogger(ThisClass.FullName);")!
+        };
+        private static readonly MemberDeclarationSyntax[] ClassLoggerLazyMembers = new[]
+        {
+            SyntaxFactory.ParseMemberDeclaration("private static global::NLog.Logger? __loggerLazy;")!,
+            SyntaxFactory.ParseMemberDeclaration("private static global::NLog.Logger Logger => __loggerLazy ??= global::NLog.LogManager.GetLogger(ThisClass.FullName);")!
+        };
+
+        public void Initialize(IncrementalGeneratorInitializationContext context)
+        {
+            context.RegisterPostInitializationOutput(context =>
+            {
+                context.AddSource("ClassLoggerAttribute.g", ClassLoggerAttributeSourceText);
+                context.AddSource("ClassLoggerLazyAttribute.g", ClassLoggerLazyAttributeSourceText);
+            });
+
+            context.RegisterSourceOutput(
+                context.SyntaxProvider.ForAttributeWithMetadataName("ClassLoggerAttribute", ThisClassGenerator.IsClassDeclaration, TransformClassLogger),
+                AddSource);
+            context.RegisterSourceOutput(
+                context.SyntaxProvider.ForAttributeWithMetadataName("ClassLoggerLazyAttribute", ThisClassGenerator.IsClassDeclaration, TransformClassLoggerLazy),
+                AddSource);
         }
 
-        public void Execute(GeneratorExecutionContext context)
+        public KeyValuePair<string, SourceText> TransformClassLogger(GeneratorAttributeSyntaxContext syntaxContext, CancellationToken cancellationToken) =>
+            new($"{syntaxContext.TargetSymbol.Name}_ClassLogger", Transform(syntaxContext, ClassLoggerMembers));
+
+        public KeyValuePair<string, SourceText> TransformClassLoggerLazy(GeneratorAttributeSyntaxContext syntaxContext, CancellationToken cancellationToken) =>
+            new($"{syntaxContext.TargetSymbol.Name}_ClassLoggerLazy", Transform(syntaxContext, ClassLoggerLazyMembers));
+
+        public static SourceText Transform(GeneratorAttributeSyntaxContext syntaxContext, MemberDeclarationSyntax[] members)
         {
-            //System.Diagnostics.Debugger.Launch();
-            context.AddSource("ClassLoggerAttribute.g", ClassLoggerAttributeSourceText);
-            context.AddSource("ClassLoggerLazyAttribute.g", ClassLoggerLazyAttributeSourceText);
-
-            if (context.SyntaxReceiver is ThisClassNLogSyntaxReceiver receiver)
+            var namedTypeSymbol = (INamedTypeSymbol)syntaxContext.TargetSymbol;
+            try
             {
-                var options = (context.Compilation as CSharpCompilation)?.SyntaxTrees[0].Options as CSharpParseOptions;
-                var compilation = context.Compilation.AddSyntaxTrees(
-                    CSharpSyntaxTree.ParseText(ClassLoggerAttributeSourceText, options),
-                    CSharpSyntaxTree.ParseText(ClassLoggerLazyAttributeSourceText, options));
+                var context = ThisClassContext.FromTypeSymbol(syntaxContext.TargetNode, namedTypeSymbol, syntaxContext.SemanticModel);
+                context = ThisClassGenerator.AddThisClass(context);
+                context = context with { Members = context.Members.AddRange(members) };
+                return context.CreateSourceText();
 
-                var classLoggerAttributeSymbol = compilation.GetTypeByMetadataName("ClassLoggerAttribute");
-                if (classLoggerAttributeSymbol is null)
-                {
-                    return;
-                }
-
-                var classLoggerLazyAttributeSymbol = compilation.GetTypeByMetadataName("ClassLoggerLazyAttribute");
-                if (classLoggerLazyAttributeSymbol is null)
-                {
-                    return;
-                }
-
-                var namedTypeSymbols = receiver.CandidateClasses
-                    .Where(x => x.AttributeLists.Count > 0)
-                    .Select(x => compilation
-                        .GetSemanticModel(x.SyntaxTree)
-                        .GetDeclaredSymbol(x))
-                    .Distinct(SymbolEqualityComparer.Default)
-                    .OfType<INamedTypeSymbol>();
-
-                foreach (var namedTypeSymbol in namedTypeSymbols)
-                {
-                    try
-                    {
-                        var template = ThisClassGenerator.HasAttribute(namedTypeSymbol, classLoggerLazyAttributeSymbol)
-                            ? ClassLoggerLazyTemplate
-                            : ThisClassGenerator.HasAttribute(namedTypeSymbol, classLoggerAttributeSymbol)
-                                ? ClassLoggerTemplate
-                                : null;
-                        var source = template is not null ? GetCurrentClassLoggerSource(namedTypeSymbol, template, compilation) : null;
-                        if (source is not null)
-                        {
-                            ThisClassGenerator.AddThisClassToClass(context, namedTypeSymbol);
-                            context.AddSource($"{namedTypeSymbol.Name}_ClassLogger.g", SourceText.From(source, Encoding.UTF8));
-                        }
-
-                    }
-                    catch (Exception e)
-                    {
-                        _ = e;
+            }
+            catch (Exception e)
+            {
+                _ = e;
 #if DEBUG
-                        System.Diagnostics.Debugger.Launch();
+                System.Diagnostics.Debugger.Launch();
 #endif
-                        throw;
-                    }
-
-
-                }
+                throw;
             }
         }
 
-        private static string? GetCurrentClassLoggerSource(INamedTypeSymbol namedTypeSymbol, Template template, Compilation compilation)
+        public static void AddSource(SourceProductionContext context, KeyValuePair<string, SourceText> source)
         {
-            if (namedTypeSymbol.IsInContainingNamespace())
-            {
-                var (namespaceName, className) = ThisClassGenerator.GetClassDeclaration(namedTypeSymbol, compilation);
-                return template.Render(new
-                {
-                    Namespace = namespaceName,
-                    Class = className,
-                });
-            }
-
-            return null;
-        }
-
-        class ThisClassNLogSyntaxReceiver : ISyntaxReceiver
-        {
-            public HashSet<ClassDeclarationSyntax> CandidateClasses { get; } = new();
-
-            public void OnVisitSyntaxNode(SyntaxNode syntaxNode)
-            {
-                if (syntaxNode is ClassDeclarationSyntax classDeclarationSyntax)
-                {
-                    CandidateClasses.Add(classDeclarationSyntax);
-                }
-            }
+            context.AddSource($"{source.Key}.g", source.Value);
         }
     }
 }

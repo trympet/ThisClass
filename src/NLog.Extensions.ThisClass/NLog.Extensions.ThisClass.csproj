@@ -12,7 +12,9 @@
     <Compile Include="../ThisClass/EmbeddedResource.cs" />
     <Compile Include="../ThisClass/INamedTypeSymbolExtensions.cs" />
     <Compile Include="../ThisClass/ThisClassGenerator.Statics.cs" />
+    <Compile Include="../ThisClass/ThisClassGenerator.Constants.cs" />
     <Compile Include="../ThisClass/QualifiedNameSyntaxRewriter.cs" />
+    <Compile Include="../ThisClass/ThisClassContext.cs" />
     <EmbeddedResource Include="../ThisClass/ThisClass.sbntxt" />
     <EmbeddedResource Include="../ThisClass/ThisClassAttribute.txt" />
   </ItemGroup>

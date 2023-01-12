@@ -1,67 +1,33 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 using Scriban;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using ThisClass.Common;
 
 namespace ThisClass
 {
-    [Generator]
-    public partial class ThisClassGenerator : ISourceGenerator
+    [Generator(LanguageNames.CSharp)]
+    public partial class ThisClassGenerator : IIncrementalGenerator
     {
-        public void Initialize(GeneratorInitializationContext context)
+        internal static readonly SourceText ThisClassAttributeSourceText = SourceText.From(EmbeddedResource.GetContent("ThisClassAttribute.txt"), Encoding.UTF8);
+        public void Initialize(IncrementalGeneratorInitializationContext context)
         {
-            //System.Diagnostics.Debugger.Launch();
-            context.RegisterForSyntaxNotifications(() => new ThisClassSyntaxReceiver());
-        }
-
-        public void Execute(GeneratorExecutionContext context)
-        {
-            AddThisClassAttribute(context);
-            if (context.SyntaxReceiver is ThisClassSyntaxReceiver receiver)
+            context.RegisterPostInitializationOutput(context =>
             {
-                var options = (context.Compilation as CSharpCompilation)?.SyntaxTrees[0].Options as CSharpParseOptions;
-                var compilation = context.Compilation.AddSyntaxTrees(CSharpSyntaxTree.ParseText(ThisClassAttributeSourceText, options));
+                context.AddSource("ThisClassAttribute.g", ThisClassAttributeSourceText);
+            });
 
-                var thisClassAttributeSymbol = compilation.GetTypeByMetadataName($"ThisClassAttribute");
-                if (thisClassAttributeSymbol is null)
-                {
-                    return;
-                }
-
-                foreach (var candidateClass in receiver.CandidateClasses)
-                {
-                    var semanticModel = compilation.GetSemanticModel(candidateClass.SyntaxTree);
-                    var namedTypeSymbol = semanticModel.GetDeclaredSymbol(candidateClass);
-                    if (namedTypeSymbol is null)
-                    {
-                        continue;
-                    }
-
-                    if (HasAttribute(namedTypeSymbol, thisClassAttributeSymbol))
-                    {
-                        AddThisClassToClass(context, namedTypeSymbol);
-                    }
-                }
-            }
-        }
-
-        class ThisClassSyntaxReceiver : ISyntaxReceiver
-        {
-            public List<ClassDeclarationSyntax> CandidateClasses { get; } = new();
-
-            public void OnVisitSyntaxNode(SyntaxNode syntaxNode)
-            {
-                if (syntaxNode is ClassDeclarationSyntax classDeclarationSyntax)
-                {
-                    CandidateClasses.Add(classDeclarationSyntax);
-                }
-            }
+            context.RegisterSourceOutput(
+                context.SyntaxProvider.ForAttributeWithMetadataName("ThisClassAttribute", IsClassDeclaration, static (ctx, ct) =>
+                    (ctx.TargetSymbol.Name, AddThisClass(ThisClassContext.FromTypeSymbol(ctx.TargetNode, (INamedTypeSymbol)ctx.TargetSymbol, ctx.SemanticModel))
+                        .CreateSourceText())
+                ),
+                static (ctx, source) => ctx.AddSource($"{source.Name}_ThisClass.g", source.Item2));
         }
     }
 }
