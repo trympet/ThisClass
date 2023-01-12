@@ -15,8 +15,6 @@ namespace SampleApp.NLog
             try
             {
                 new Demo1();
-                new Demo2();
-                Demo3.SayHello();
             }
             finally
             {
@@ -48,50 +46,18 @@ namespace SampleApp.NLog
         }
     }
 
-    [ClassLogger]
-    partial class Demo2
-    {
-        public Demo2()
-        {
-            try
-            {
-                Logger.Trace("Hello World from {}", ThisClass.FullName);
-                DoImportantWork();
-                return;
-            }
-            catch (Exception e)
-            {
-                Logger.Error(e);
-            }
-        }
-
-        private static void DoImportantWork()
-        {
-            throw new Exception("Whoops!");
-        }
-    }
-
-    [ClassLoggerLazy]
-    partial class Demo3
-    {
-        public static void SayHello()
-        {
-            Logger.Info("Hei på deg");
-        }
-    }
-
     namespace AnotherNamespace
     {
-        using SomeOtherNamespace; // crazy syntaxs
+        using SomeOtherNamespace;
         [ClassLoggerLazy]
-        partial class Demo4<T> : SomeInterface<T> where T : SomeOtherInterface
+        partial class Demo2<T> : SomeInterface<T> where T : SomeOtherInterface
         {
             public static void SayHello()
             {
                 Logger.Info("Hei på deg");
             }
 
-            [ClassLoggerLazy]
+            [ClassLogger]
             internal partial class NestedClass : SomeInterface<SomeOtherInterface>
             {
             }
