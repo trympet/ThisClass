@@ -12,6 +12,7 @@
     <Compile Include="../ThisClass/EmbeddedResource.cs" />
     <Compile Include="../ThisClass/INamedTypeSymbolExtensions.cs" />
     <Compile Include="../ThisClass/ThisClassGenerator.Statics.cs" />
+    <Compile Include="../ThisClass/QualifiedNameSyntaxRewriter.cs" />
     <EmbeddedResource Include="../ThisClass/ThisClass.sbntxt" />
     <EmbeddedResource Include="../ThisClass/ThisClassAttribute.txt" />
   </ItemGroup>
@@ -24,13 +25,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="IThisClassImpl.sbntxt" />
-    <EmbeddedResource Include="ThisClassAttribute.IThisClass.txt" />
-    <EmbeddedResource Include="ThisClassExtensions.txt" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="NLog" Version="4.7.13" Pack="false" IncludeAssets="build" PrivateAssets="All" />
+    <PackageReference Include="NLog" Version="5.*" Pack="false" IncludeAssets="build" PrivateAssets="All" />
   </ItemGroup>
 
   <ItemGroup>

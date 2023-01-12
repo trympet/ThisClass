@@ -3,6 +3,8 @@ using NLog.Config;
 using NLog.Targets;
 using NLog.Targets.Wrappers;
 using System;
+using SomeNamespace;
+using SomeOtherNamespace;
 
 namespace SampleApp.NLog
 {
@@ -43,8 +45,7 @@ namespace SampleApp.NLog
         public Demo1()
         {
             // Extention method instantiation
-            var x = this.GetCurrentClassLogger();
-            x.Trace("Hello World from {}", ThisClass.FullName);
+            LogManager.GetCurrentClassLogger().Trace("Hello World from {}", ThisClass.FullName);
         }
     }
 
@@ -73,6 +74,14 @@ namespace SampleApp.NLog
 
     [ClassLoggerLazy]
     partial class Demo3
+    {
+        public static void SayHello()
+        {
+            Logger.Info("Hei på deg");
+        }
+    }
+    [ClassLoggerLazy]
+    partial class Demo4<T> : SomeInterface<T> where T : SomeOtherInterface
     {
         public static void SayHello()
         {

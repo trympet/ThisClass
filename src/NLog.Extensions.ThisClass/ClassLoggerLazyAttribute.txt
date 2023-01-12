@@ -2,6 +2,6 @@
 
 using System;
 [AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = true)]
-sealed partial class ClassLoggerLazyAttribute : Attribute
+sealed class ClassLoggerLazyAttribute : Attribute
 {
 }
