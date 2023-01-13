@@ -14,7 +14,7 @@
     <PackageLicenseExpression>GPL-2.0-only</PackageLicenseExpression>
     <requireLicenseAcceptance>true</requireLicenseAcceptance>
     <PackageScribanIncludeSource>true</PackageScribanIncludeSource>
-    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageReadmeFile>readme.md</PackageReadmeFile>
   </PropertyGroup>
 
   <ItemGroup>
