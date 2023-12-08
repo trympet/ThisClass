@@ -64,8 +64,14 @@ namespace ThisClass
             var scopedSemanticModel = SemanticModel.Compilation.AddSyntaxTrees(root.SyntaxTree).GetSemanticModel(root.SyntaxTree);
 
             var rewriter = new QualifiedNameSyntaxRewriter(scopedSemanticModel);
-            var compilationUnit = SyntaxFactory.CompilationUnit(default, default, default,
-                SyntaxFactory.SingletonList(rewriter.Visit(root).DescendantNodes().First(x => x.HasAnnotation(contentAnnotation))))
+            var compilationUnit = SyntaxFactory.CompilationUnit(
+                externs: default,
+                usings: default,
+                attributeLists: default,
+                members: SyntaxFactory.SingletonList(
+                    (MemberDeclarationSyntax)rewriter.Visit(root)
+                    .DescendantNodes()
+                    .First(x => x.HasAnnotation(contentAnnotation))))
                 .WithLeadingTrivia(ThisClassGenerator.LeadingCompilationTrivia);
             return compilationUnit.NormalizeWhitespace().GetText(Encoding.UTF8);
         }
