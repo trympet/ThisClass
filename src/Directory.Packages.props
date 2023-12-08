@@ -14,5 +14,10 @@
     <PackageLicenseExpression>GPL-2.0-only</PackageLicenseExpression>
     <requireLicenseAcceptance>true</requireLicenseAcceptance>
     <PackageScribanIncludeSource>true</PackageScribanIncludeSource>
+    <PackageReadmeFile>readme.md</PackageReadmeFile>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="$([MSBuild]::GetPathOfFileAbove('readme.md', '$(MSBuildThisFileDirectory)../'))" Pack="true" PackagePath="\"/>
+  </ItemGroup>
 </Project>
