@@ -9,4 +9,22 @@ partial class Program
     {
         Console.WriteLine($"Full name: {ThisClass.FullName}");
     }
+
+    [ThisClass]
+    partial record Record
+    {
+
+    }
+
+    [ThisClass]
+    partial record struct RecordStruct
+    {
+
+    }
+
+    [ThisClass]
+    partial struct Struct
+    {
+
+    }
 }

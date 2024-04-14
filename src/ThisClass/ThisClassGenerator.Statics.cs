@@ -1,6 +1,7 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System.Threading;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace ThisClass;
 
@@ -19,8 +20,6 @@ public partial class ThisClassGenerator
         };
     }
 
-    public static bool IsClassDeclaration(SyntaxNode syntaxNode, CancellationToken cancellationToken)
-    {
-        return syntaxNode.IsKind(SyntaxKind.ClassDeclaration);
-    }
+    public static bool IsClassDeclaration(SyntaxNode syntaxNode, CancellationToken cancellationToken) =>
+        syntaxNode is TypeDeclarationSyntax;
 }
