@@ -4,6 +4,10 @@
   <PropertyGroup>
     <PackageOutputPath>$([System.IO.Path]::Combine($(MSBuildProjectDirectory), '../../dist'))</PackageOutputPath>
   </PropertyGroup>
+
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+  </PropertyGroup>
   
   <PropertyGroup>
     <PackageTags>dotnet roslyn</PackageTags>
@@ -19,5 +23,14 @@
 
   <ItemGroup>
     <None Include="$([MSBuild]::GetPathOfFileAbove('readme.md', '$(MSBuildThisFileDirectory)../'))" Pack="true" PackagePath="\"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageVersion Include="Microsoft.CodeAnalysis.Analyzers" Version="3.3.4" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="4.9.2" />
+    <PackageVersion Include="Microsoft.CSharp" Version="4.7.0" />
+    <PackageVersion Include="Nerdbank.GitVersioning" Version="3.6.133" />
+    <PackageVersion Include="NLog" Version="5.2.8" />
+    <PackageVersion Include="Scriban" Version="5.10.0" />
   </ItemGroup>
 </Project>

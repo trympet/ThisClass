@@ -24,7 +24,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="NLog" Version="5.*" Pack="false" IncludeAssets="build" PrivateAssets="All" />
+    <PackageReference Include="NLog" Pack="false" IncludeAssets="build" PrivateAssets="All" />
   </ItemGroup>
 
   <ItemGroup>
