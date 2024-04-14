@@ -1,32 +1,25 @@
-﻿using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.Text;
-using Microsoft.CodeAnalysis;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using ThisClass.Common;
+﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using System.Threading;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace ThisClass
+namespace ThisClass;
+
+public partial class ThisClassGenerator
 {
-    public partial class ThisClassGenerator
+    internal static readonly SymbolDisplayFormat FullyQualifiedDisplayFormat = new SymbolDisplayFormat(typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces);
+    internal static readonly SymbolDisplayFormat FullyQualifiedGlobalDisplayFormat = SymbolDisplayFormat.FullyQualifiedFormat.WithGlobalNamespaceStyle(SymbolDisplayGlobalNamespaceStyle.Included);
+
+    public static ThisClassContext AddThisClass(ThisClassContext context)
     {
-        internal static readonly SymbolDisplayFormat FullyQualifiedDisplayFormat = new SymbolDisplayFormat(typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces);
-        internal static readonly SymbolDisplayFormat FullyQualifiedGlobalDisplayFormat = SymbolDisplayFormat.FullyQualifiedFormat.WithGlobalNamespaceStyle(SymbolDisplayGlobalNamespaceStyle.Included);
-
-        public static ThisClassContext AddThisClass(ThisClassContext context)
+        var fullName = context.TypeSymbol.ToDisplayString(FullyQualifiedDisplayFormat);
+        var fieldDeclaration = SyntaxFactory.ParseMemberDeclaration($"public const string FullName = \"{fullName}\";")!;
+        return context with
         {
-            var fullName = context.TypeSymbol.ToDisplayString(FullyQualifiedDisplayFormat);
-            var fieldDeclaration = SyntaxFactory.ParseMemberDeclaration($"public const string FullName = \"{fullName}\";")!;
-            return context with
-            {
-                Members = context.Members.Add(ThisClassPartialClass.AddMembers(fieldDeclaration!.WithLeadingTrivia(FullNameFieldTrivia)))
-            };
-        }
-
-        public static bool IsClassDeclaration(SyntaxNode syntaxNode, CancellationToken cancellationToken)
-        {
-            return syntaxNode.IsKind(SyntaxKind.ClassDeclaration);
-        }
+            Members = context.Members.Add(ThisClassPartialClass.AddMembers(fieldDeclaration!.WithLeadingTrivia(FullNameFieldTrivia)))
+        };
     }
+
+    public static bool IsClassDeclaration(SyntaxNode syntaxNode, CancellationToken cancellationToken) =>
+        syntaxNode is TypeDeclarationSyntax;
 }
